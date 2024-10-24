@@ -10,7 +10,6 @@
             class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Servicios</h1>
         </div>
-
         <form action="includes/servicios/saveservicio.php" method="POST">
             <div class="mb-3">
                 <label for="trabajador" class="form-label">Trabajador</label>
@@ -43,56 +42,80 @@
                     $stmt = $pdo->query('SELECT id, nombre FROM metodos_pago');
                     $first = true; // Variable para identificar la primera opción
                     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                        // Marca la primera opción como seleccionada
                         $selected = $first ? 'selected' : '';
                         echo "<option value='{$row['id']}' {$selected}>{$row['nombre']}</option>";
-                        $first = false; // A partir de aquí, ninguna opción será seleccionada
+                        $first = false;
                     }
                     ?>
                 </select>
             </div>
             <div class="mb-3">
-                <label for="usar_insumos" class="form-label">¿El servicio utilizará insumos?</label>
-                <select class="form-select" id="usar_insumos" name="usar_insumos" onchange="toggleInsumos()">
-                    <option value="no" selected>No</option>
-                    <option value="si">Sí</option>
-                </select>
+                <label for="agregar_insumos" class="form-label d-block">Insumos:</label>
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#insumosModal">
+                    Agregar Insumos
+                </button>
             </div>
-            <!-- Contenedor de Insumos (Inicialmente Oculto) -->
-            <div id="insumos-container" class="d-none">
-                <label for="insumos" class="form-label mt-3">Insumos utilizados</label>
-                <div class="container">
-                    <?php
-                    $stmt = $pdo->query('SELECT id, nombre, precio FROM insumo');
-                    $counter = 0;
-                    echo '<div class="row g-3">'; // g-3 para espacio entre columnas
-                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                        if ($counter > 0 && $counter % 6 == 0) {
-                            echo '</div><div class="row g-3">';
-                        }
-                        echo "
-                    <div class='col-md-3 col-lg-2 mb-3'> <!-- Ajusta el ancho de columna -->
-                        <div class='form-check'>
-                            <input type='checkbox' name='insumos[{$row['id']}]' value='{$row['nombre']}' id='insumo_{$row['id']}' class='form-check-input' onchange='updateTotal()'>
-                            <label for='insumo_{$row['id']}' class='form-check-label'>{$row['nombre']} - S/. {$row['precio']}</label>
-                        </div>
-                        <input type='number' name='cantidades[{$row['id']}]' placeholder='Cantidad' class='form-control d-inline-block' style='width: 100px; margin-left: 10px;' min='1' onchange='updateTotal()'>
-                        <input type='hidden' id='precio_{$row['id']}' value='{$row['precio']}'>
-                    </div>";
-                                        $counter++;
-                    }
-                    echo '</div>'; // Cierre de la última fila
-                    ?>
-                </div>
+
+            <div class="mb-3">
+                <div id="total_insumos">Total de Insumos: S/. 0.00</div>
             </div>
+            <input type="hidden" id="insumos_data" name="insumos_data">
 
             <button type="submit" class="btn btn-primary mt-3">Guardar Servicio</button>
         </form>
     </main>
 
-
     <?php include 'includes/footer.php'; ?>
     <?php include 'includes/scripts.php'; ?>
+
+    <!-- Modal para agregar insumos -->
+    <div class="modal fade" id="insumosModal" tabindex="-1" aria-labelledby="insumosModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="insumosModalLabel">Agregar Insumos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Seleccionar</th>
+                                <th scope="col">Insumo</th>
+                                <th scope="col">Precio</th>
+                                <th scope="col">Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $stmt = $pdo->query('SELECT id, nombre, precio FROM insumo');
+                            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                echo "
+                            <tr>
+                                <td>
+                                    <div class='form-check'>
+                                        <input type='checkbox' class='form-check-input' id='insumo_{$row['id']}' data-precio='{$row['precio']}' onchange='toggleInsumo({$row['id']})'>
+                                    </div>
+                                </td>
+                                <td>{$row['nombre']}</td>
+                                <td>S/. {$row['precio']}</td>
+                                <td>
+                                    <input type='number' class='form-control' id='cantidad_{$row['id']}' placeholder='Cantidad' min='1' value='1' disabled>
+                                </td>
+                            </tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="agregarInsumos()">Agregar Insumos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 </body>
 

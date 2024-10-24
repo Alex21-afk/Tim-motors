@@ -1,3 +1,5 @@
+
+
 function confirmLogout(event, logoutUrl) {
     event.preventDefault();
     if (confirm("¿Estás seguro de que quieres cerrar sesión?")) {
@@ -68,5 +70,45 @@ document.addEventListener('DOMContentLoaded', function() {
      });
  });
 
+//insumos
 
+let insumosSeleccionados = {};
 
+function toggleInsumo(id) {
+    const checkbox = document.getElementById(`insumo_${id}`);
+    const cantidadInput = document.getElementById(`cantidad_${id}`);
+    if (checkbox.checked) {
+        cantidadInput.disabled = false;
+    } else {
+        cantidadInput.disabled = true;
+        delete insumosSeleccionados[id];
+    }
+}
+
+function agregarInsumos() {
+    insumosSeleccionados = {}; // Reiniciamos la lista
+    document.querySelectorAll('.form-check-input:checked').forEach(checkbox => {
+        const id = checkbox.id.split('_')[1];
+        const cantidad = document.getElementById(`cantidad_${id}`).value;
+        const precio = checkbox.getAttribute('data-precio');
+        insumosSeleccionados[id] = { cantidad, precio };
+    });
+
+    // Actualizar el total de insumos
+    updateTotal();
+
+    // Guardar los insumos en un campo oculto para enviar al servidor
+    document.getElementById('insumos_data').value = JSON.stringify(insumosSeleccionados);
+
+    // Mostrar los insumos seleccionados en el formulario principal (si lo deseas)
+    console.log(insumosSeleccionados);
+}
+
+function updateTotal() {
+    let total = 0;
+    for (const insumoId in insumosSeleccionados) {
+        const insumo = insumosSeleccionados[insumoId];
+        total += insumo.cantidad * insumo.precio;
+    }
+    document.getElementById('total_insumos').innerText = `Total de Insumos: S/. ${total.toFixed(2)}`; // Mostrar total en el formulario
+}
