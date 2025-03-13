@@ -28,16 +28,7 @@
         </div>
 
         <!-- Selección del tipo de reporte -->
-        <div class="col-md">
-          <label for="reporte" class="form-label">Seleccionar Tipo de Reporte</label>
-          <select class="form-select" id="reporte" name="reporte">
-            <option value="" disabled>Seleccione un reporte</option>
-            <option value="diario" <?php echo (!isset($_GET['reporte']) || $_GET['reporte'] == 'diario') ? 'selected' : ''; ?>>Diario</option>
-            <option value="semanal" <?php echo (isset($_GET['reporte']) && $_GET['reporte'] == 'semanal') ? 'selected' : ''; ?>>Semanal</option>
-            <option value="mensual" <?php echo (isset($_GET['reporte']) && $_GET['reporte'] == 'mensual') ? 'selected' : ''; ?>>Mensual</option>
-          </select>
-        </div>
-
+        
         <!-- Botones de acción -->
         <div class="col-md d-flex align-items-end">
           <button type="submit" class="btn btn-primary me-2">Generar Reporte</button>
