@@ -28,46 +28,33 @@
                         value="<?php echo isset($_GET['fecha_fin']) ? htmlspecialchars($_GET['fecha_fin']) : ''; ?>">
                 </div>
 
-                <!-- Selección de trabajador -->
-                <div class="col-md">
-                    <label for="trabajador" class="form-label">Trabajador</label>
-                    <select class="form-select" id="trabajador" name="trabajador">
-                        <option value="" disabled <?php echo (!isset($_GET['trabajador'])) ? 'selected' : ''; ?>>
-                            Seleccione un trabajador</option>
-                        <?php
-                        $stmt = $pdo->query('SELECT id, nombres FROM trabajador');
-                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                            echo "<option value='{$row['id']}' " . (isset($_GET['trabajador']) && $_GET['trabajador'] == $row['id'] ? 'selected' : '') . ">{$row['nombres']}</option>";
-                        }
-                        ?>
-                    </select>
-                </div>
+              <!-- Selección de trabajador -->
+<div class="col-md">
+    <label for="trabajador" class="form-label">Trabajador</label>
+    <select class="form-select" id="trabajador" name="trabajador">
+        <option value="">Todos</option> <!-- Opción vacía habilitada -->
+        <?php
+        $stmt = $pdo->query('SELECT id, nombres FROM trabajador');
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            echo "<option value='{$row['id']}' " . (isset($_GET['trabajador']) && $_GET['trabajador'] == $row['id'] ? 'selected' : '') . ">{$row['nombres']}</option>";
+        }
+        ?>
+    </select>
+</div>
 
-                <!-- Selección del tipo de reporte -->
-                <div class="col-md">
-                    <label for="reporte" class="form-label">Tipo de Reporte</label>
-                    <select class="form-select" id="reporte" name="reporte">
-                        <option value="" disabled>Seleccione un reporte</option>
-                        <option value="diario" <?php echo (!isset($_GET['reporte']) || $_GET['reporte'] == 'diario') ? 'selected' : ''; ?>>Diario</option>
-                        <option value="semanal" <?php echo (isset($_GET['reporte']) && $_GET['reporte'] == 'semanal') ? 'selected' : ''; ?>>Semanal</option>
-                        <option value="mensual" <?php echo (isset($_GET['reporte']) && $_GET['reporte'] == 'mensual') ? 'selected' : ''; ?>>Mensual</option>
-                    </select>
-                </div>
-
-                <!-- Selección del método de pago -->
-                <div class="col-md">
-                    <label for="metodo_pago" class="form-label">Método de Pago</label>
-                    <select class="form-select" id="metodo_pago" name="metodo_pago">
-                        <option value="" disabled <?php echo (!isset($_GET['metodo_pago'])) ? 'selected' : ''; ?>>
-                            Seleccione un método de pago</option>
-                        <?php
-                        $stmt = $pdo->query('SELECT id, nombre FROM metodos_pago');
-                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                            echo "<option value='{$row['id']}' " . (isset($_GET['metodo_pago']) && $_GET['metodo_pago'] == $row['id'] ? 'selected' : '') . ">{$row['nombre']}</option>";
-                        }
-                        ?>
-                    </select>
-                </div>
+<!-- Selección del método de pago -->
+<div class="col-md">
+    <label for="metodo_pago" class="form-label">Método de Pago</label>
+    <select class="form-select" id="metodo_pago" name="metodo_pago">
+        <option value="">Todos</option> <!-- Opción vacía habilitada -->
+        <?php
+        $stmt = $pdo->query('SELECT id, nombre FROM metodos_pago');
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            echo "<option value='{$row['id']}' " . (isset($_GET['metodo_pago']) && $_GET['metodo_pago'] == $row['id'] ? 'selected' : '') . ">{$row['nombre']}</option>";
+        }
+        ?>
+    </select>
+</div>
 
                 <!-- Botones de acción -->
                 <div class="col-md d-flex align-items-end">
