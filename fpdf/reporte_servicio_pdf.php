@@ -5,6 +5,8 @@ require('./fpdf.php');
 class PDF extends FPDF
 {
     public $suma_total_general;
+    public $fecha_inicio;
+    public $fecha_fin;
 
     function Header()
     {
@@ -18,7 +20,6 @@ class PDF extends FPDF
         $this->Ln(3);
         $this->SetTextColor(103);
 
-        // Información de la empresa
         $this->Cell(180);
         $this->SetFont('Arial', 'B', 10);
         $this->Cell(96, 10, utf8_decode("Ubicación : Av arquitectos mz A lt2 los pinos"), 0, 0);
@@ -32,22 +33,26 @@ class PDF extends FPDF
         $this->Cell(180);
         $this->Cell(85, 10, utf8_decode("Sucursal : Pachacútec Ventanilla"), 0, 0);
         $this->Ln(5);
-
-        // Suma total general en la parte superior derecha
+        
         $this->Cell(180);
         $this->SetFont('Arial', 'B', 12);
         $this->SetTextColor(0, 0, 255);
         $this->Cell(85, 10, utf8_decode("Suma Total General: S/ " . number_format($suma_total_general, 2)), 0, 0, 'R');
         $this->Ln(10);
 
-        // Título del reporte
         $this->SetTextColor(228, 100, 0);
         $this->Cell(100);
         $this->SetFont('Arial', 'B', 15);
         $this->Cell(100, 10, utf8_decode("REPORTE DE SERVICIOS"), 0, 1, 'C', 0);
+
+        $this->SetTextColor(0, 0, 0);
+        $this->SetFont('Arial', 'B', 12);
+        $this->Cell(100);
+        if (!empty($this->fecha_inicio) && !empty($this->fecha_fin)) {
+            $this->Cell(100, 10, utf8_decode("Rango de fechas: $this->fecha_inicio - $this->fecha_fin"), 0, 1, 'C', 0);
+        }
         $this->Ln(7);
 
-        // Encabezado de la tabla
         $this->SetFillColor(228, 100, 0);
         $this->SetTextColor(255, 255, 255);
         $this->SetFont('Arial', 'B', 11);
@@ -76,11 +81,12 @@ $fecha_inicio = $_GET['fecha_inicio'] ?? '';
 $fecha_fin = $_GET['fecha_fin'] ?? '';
 
 $pdf = new PDF();
+$pdf->fecha_inicio = $fecha_inicio;
+$pdf->fecha_fin = $fecha_fin;
 $pdf->AliasNbPages();
 $pdf->SetFont('Arial', '', 12);
 $pdf->SetDrawColor(163, 163, 163);
 
-// Consulta SQL
 $sql = 'SELECT t.descripcion, t.fecha, t.monto AS costo, w.nombres AS trabajador, mp.nombre AS metodo_pago,
         COALESCE((SELECT SUM(cantidad * precio) FROM insumo_transacciones it
                  JOIN insumo i ON it.insumo_id = i.id
@@ -106,29 +112,24 @@ if ($fecha_inicio && $fecha_fin) {
 }
 $stmt->execute();
 
-// Calcular la suma total general
 $suma_total_general = 0;
 $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 foreach ($datos as $row) {
     $suma_total_general += $row['suma_total'];
 }
 
-$pdf->suma_total_general = $suma_total_general; // Pasamos el valor al objeto PDF
+$pdf->suma_total_general = $suma_total_general;
 $pdf->AddPage("landscape");
 
-if (count($datos) > 0) {
-    foreach ($datos as $row) {
-        $pdf->Cell(80, 10, utf8_decode($row['descripcion']), 1);
-        $pdf->Cell(25, 10, utf8_decode($row['fecha']), 1);
-        $pdf->Cell(25, 10, utf8_decode('S/ ' . number_format($row['costo'], 2)), 1);
-        $pdf->Cell(50, 10, utf8_decode($row['trabajador']), 1);
-        $pdf->Cell(40, 10, utf8_decode($row['metodo_pago']), 1);
-        $pdf->Cell(20, 10, utf8_decode('S/ ' . number_format($row['total_insumos'], 2)), 1);
-        $pdf->Cell(20, 10, utf8_decode('S/ ' . number_format($row['suma_total'], 2)), 1);
-        $pdf->Ln();
-    }
-} else {
-    $pdf->Cell(0, 10, 'No se encontraron datos.', 0, 1, 'C');
+foreach ($datos as $row) {
+    $pdf->Cell(80, 10, utf8_decode($row['descripcion']), 1);
+    $pdf->Cell(25, 10, utf8_decode($row['fecha']), 1);
+    $pdf->Cell(25, 10, utf8_decode('S/ ' . number_format($row['costo'], 2)), 1);
+    $pdf->Cell(50, 10, utf8_decode($row['trabajador']), 1);
+    $pdf->Cell(40, 10, utf8_decode($row['metodo_pago']), 1);
+    $pdf->Cell(20, 10, utf8_decode('S/ ' . number_format($row['total_insumos'], 2)), 1);
+    $pdf->Cell(20, 10, utf8_decode('S/ ' . number_format($row['suma_total'], 2)), 1);
+    $pdf->Ln();
 }
 
 $pdf->Output('I', 'reporte_servicios.pdf');
